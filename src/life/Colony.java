@@ -50,13 +50,7 @@ public class Colony {
 
         colonyMap.values().forEach(cell -> cell.survive(this));
 
-        colonyMap.values().stream().sorted((p1, p2) -> {
-            if (p1.getLocation().y == p2.getLocation().y) {
-                return Integer.compare(p1.getLocation().x, p2.getLocation().x);
-            } else {
-                return Integer.compare(p1.getLocation().y, p2.getLocation().y);
-            }
-        }).forEach(
+        colonyMap.values().forEach(
                 cell -> cell.evolve(this)
         );
 

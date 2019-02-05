@@ -59,7 +59,7 @@ public class Cell {
                 colony.createDeadCellsAround(this.location);
                 break;
             case DESOLATION:
-
+                toBeDeleted = true;
             default:
                 this.willSurvive = false;
         }
@@ -81,6 +81,7 @@ public class Cell {
     public void survive(Colony colony) {
         this.isAlive = willSurvive;
         this.willSurvive = false;
-        if (toBeDeleted) colony.deleteCellAt(this.location);
+        if (toBeDeleted)
+            colony.deleteCellAt(this.location);
     }
 }
