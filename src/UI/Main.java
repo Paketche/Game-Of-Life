@@ -39,9 +39,6 @@ public class Main extends Application {
         primaryStage.show();
 
         view.resetCanvas();
-        colony.iterate();
-
-        view.render(colony);
         colonyController.startAnimation(Duration.millis(500));
     }
 }
