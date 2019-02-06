@@ -13,12 +13,14 @@ import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Slider;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import life.Colony;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -33,11 +35,16 @@ public class ColonyController extends Service<Colony> {
 
     private Colony colony;
     private ColonyView colonyView;
+
     private Timeline timeline;
+
     private Stage stage;
     private FileChooser fileChooser;
-    private Task<Colony> colonyTask;
     private Alert alert;
+
+    private Task<Colony> colonyTask;
+
+    private Point mouseReference;
 
     @FXML
     private Slider speed = null;
@@ -54,7 +61,9 @@ public class ColonyController extends Service<Colony> {
 
         alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error reading file");
-        alert.getDialogPane().paddingProperty().setValue(new Insets(10, 20,10, 20));
+        alert.getDialogPane().paddingProperty().setValue(new Insets(10, 20, 10, 20));
+
+        mouseReference = new Point();
     }
 
     /**
@@ -65,11 +74,16 @@ public class ColonyController extends Service<Colony> {
      */
     public ColonyController(Stage stage, Colony colonyModel, ColonyView colonyView) {
         this();
-       setColony(colonyModel);
-       setStage(stage);
-       setColonyView(colonyView);
+        setColony(colonyModel);
+        setStage(stage);
+        setColonyView(colonyView);
     }
 
+    /**
+     * Creates a new task to generate the new colony on a separate thread so that the application thread is not blocked.
+     *
+     * @return the constructed task
+     */
     @Override
     protected Task<Colony> createTask() {
         return new Task<Colony>() {
@@ -78,19 +92,27 @@ public class ColonyController extends Service<Colony> {
                 colony.iterate();
 
                 //run on main application thread
-                Platform.runLater(()-> colonyView.render(colony));
+                Platform.runLater(() -> colonyView.render(colony));
                 return colony;
             }
         };
     }
 
+    /**
+     * Initializes the event listeners of the  UI controls. This is used by the FXML loader
+     */
     @FXML
     public void initialize() {
         speed.valueProperty().addListener(this::changeSpeed);
     }
 
 
-    private void iterateColony(ActionEvent event) {
+    /**
+     * Method that handle the event change
+     *
+     * @param event that caused the calling of this method
+     */
+    protected void onFrameChange(ActionEvent event) {
 
         if (isNull(colonyTask) || colonyTask.isDone()) {
             this.colonyTask = this.createTask();
@@ -101,15 +123,16 @@ public class ColonyController extends Service<Colony> {
     }
 
     /**
-     * Starts the animation of the i
+     * Starts the colony animation. Each generation is displayed for the duration that is provided as an argument
      *
-     * @param time the duration that each colony generation will be displayed
+     * @param duration the duration that each colony generation will be displayed
+     * @throws NullPointerException if either the colony, the colony view or the stage has not been set
      */
-    public void startAnimation(Duration time) {
+    public void startAnimation(Duration duration) throws NullPointerException {
         if (isNull(colony) || isNull(colonyView) || isNull(stage))
             throw new NullPointerException("Either the colony, the colony view or the stage has not been set");
 
-        timeline = new Timeline(new KeyFrame(time, this::iterateColony));
+        timeline = new Timeline(new KeyFrame(duration, this::onFrameChange));
         timeline.setCycleCount(Timeline.INDEFINITE);
     }
 
@@ -135,7 +158,13 @@ public class ColonyController extends Service<Colony> {
         if (nonNull(timeline))
             timeline.pause();
 
-        iterateColony(event);
+        onFrameChange(event);
+    }
+
+    @FXML
+    public void center(ActionEvent event) {
+        colonyView.resetOffset();
+        event.consume();
     }
 
     @FXML
@@ -152,26 +181,15 @@ public class ColonyController extends Service<Colony> {
         event.consume();
     }
 
-    public void setColony(Colony colony) {
-        this.colony = requireNonNull(colony);
-    }
-
-    public void setColonyView(ColonyView colonyView) {
-        this.colonyView = requireNonNull(colonyView);
-        this.colonyView.setCursor(Cursor.OPEN_HAND);
-    }
-
-    public void setStage(Stage stage) {
-        this.stage = requireNonNull(stage);
-    }
-
     @FXML
     public void openFile(ActionEvent event) {
         pause(event);
         try {
             File file = fileChooser.showOpenDialog(stage);
-            if (nonNull(file)){
+            if (nonNull(file)) {
+
                 Path pathToFile = Paths.get(file.getAbsolutePath());
+
                 this.colony = Colony.fromCSV(pathToFile);
 
                 this.colony.iterate();
@@ -179,12 +197,67 @@ public class ColonyController extends Service<Colony> {
 
             }
         } catch (IOException | IllegalArgumentException e) {
-            Text text =  new Text(e.getMessage());
+            Text text = new Text(e.getMessage());
             alert.getDialogPane().setContent(text);
             alert.showAndWait();
         }
     }
 
+
+    protected void onDragStarted(MouseEvent event) {
+        //set a reference point from which the drag difference is going to be calculated
+        this.colonyView.setCursor(Cursor.CLOSED_HAND);
+        mouseReference.setLocation(
+                event.getSceneX(),
+                event.getSceneY()
+        );
+
+    }
+
+    protected void onMouseDragged(MouseEvent event) {
+        //shift offset based on drag difference
+        colonyView.shiftOffsets(
+                event.getSceneX() - mouseReference.getX(),
+                event.getSceneY() - mouseReference.getY()
+        );
+
+        //reset the reference for the next drag event
+        mouseReference.setLocation(
+                event.getSceneX(),
+                event.getSceneY()
+        );
+        colonyView.render(colony);
+    }
+
+    public void setColony(Colony colony) {
+        this.colony = requireNonNull(colony);
+    }
+
+    /**
+     * Sets the colony view that this controller is going be controlling
+     *
+     * @param colonyView view that will be controlled
+     */
+    public void setColonyView(ColonyView colonyView) {
+        this.colonyView = requireNonNull(colonyView);
+        this.colonyView.setCursor(Cursor.OPEN_HAND);
+
+        this.colonyView.onMousePressedProperty().setValue(this::onDragStarted);
+        this.colonyView.onMouseDraggedProperty().setValue(this::onMouseDragged);
+        this.colonyView.onDragDoneProperty().setValue(e -> colonyView.setCursor(Cursor.OPEN_HAND));
+    }
+
+    /**
+     * Sets the window object that this controller will controlling
+     * @param stage window that is to be controlled
+     */
+    public void setStage(Stage stage) {
+        this.stage = requireNonNull(stage);
+    }
+
+    /**
+     * Method used as an event handler for the slider bar.
+     */
     private void changeSpeed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
         if (nonNull(timeline)) {
             timeline.stop();
@@ -192,7 +265,7 @@ public class ColonyController extends Service<Colony> {
             timeline.getKeyFrames().add(
                     new KeyFrame(
                             Duration.millis(newValue.intValue()),
-                            this::iterateColony
+                            this::onFrameChange
                     )
             );
             timeline.play();

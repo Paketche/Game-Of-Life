@@ -43,6 +43,11 @@
                     <Double fx:constant="MAX_VALUE"/>
                 </maxWidth>
             </Button>
+            <Button text="Center" onAction="#center">
+                <maxWidth>
+                    <Double fx:constant="MAX_VALUE"/>
+                </maxWidth>
+            </Button>
             <Separator/>
             <Label text="Evolution time(ms)"/>
             <Slider fx:id="speed" maxHeight="700"

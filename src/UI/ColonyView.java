@@ -19,6 +19,9 @@ public class ColonyView extends Canvas {
     private double offsetX;
     private double offsetY;
 
+    private final double initialOffsetX;
+    private final double initialOffsetY;
+
     private double cellDimension;
     private double cellMargin;
 
@@ -45,8 +48,8 @@ public class ColonyView extends Canvas {
         this.cellMargin = cellMargin;
 
         //used for transforming cartesian to polar coordinates
-        this.offsetX = getWidth() / 2;
-        this.offsetY = getHeight() / 2;
+        this.offsetX = this.initialOffsetX = getWidth() / 2;
+        this.offsetY = this.initialOffsetY = getHeight() / 2;
     }
 
     /**
@@ -56,11 +59,11 @@ public class ColonyView extends Canvas {
      */
     public void render(Colony colony) {
         resetCanvas();
-        Set<Cell> cells = colony.getLiveCells();
 
         context.setFill(blockColor);
 
-        cells.stream()
+        colony.getLiveCells()
+                .stream()
                 .map(Cell::getLocation)
                 .map(CellView::new)
                 .forEach(cellView -> cellView.render(context));
@@ -88,6 +91,28 @@ public class ColonyView extends Canvas {
     public void setLightTheme() {
         backGroundColor = Color.WHITE;
         blockColor = Color.BLACK;
+    }
+
+    /**
+     * Shifts the horizontal and vertical offsets that translate cartesian to polar coordinates
+     *
+     * @param offsetX the amount that the horizontal axis is going to be shifted
+     *                (negative numbers shift to the right, positive to the left)
+     * @param offsetY the amount that the vertical axis is going to be shifted
+     *                (negative numbers shift upwards, positive downwards)
+     */
+    public void shiftOffsets(double offsetX, double offsetY) {
+        System.out.println("Shifting x by " + offsetX + "y by " + offsetY);
+        this.offsetX += offsetX;
+        this.offsetY += offsetY;
+    }
+
+    /**
+     * Resets the center offset to its initial value
+     */
+    public void resetOffset() {
+        this.offsetX = this.initialOffsetX;
+        this.offsetY = this.initialOffsetY;
     }
 
     /**
