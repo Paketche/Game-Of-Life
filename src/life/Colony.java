@@ -110,14 +110,14 @@ public class Colony {
      */
     public void iterate() {
 
+        currentColony.values().forEach(
+                cell -> cell.evolve(this)
+        );
+
         this.lock.writeLock().lock();
         this.currentColony = nextColony;
         this.nextColony = new HashMap<>();
         this.lock.writeLock().unlock();
-
-        currentColony.values().forEach(
-                cell -> cell.evolve(this)
-        );
     }
 
 
