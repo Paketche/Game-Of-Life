@@ -9,6 +9,9 @@ import life.Colony;
 import java.awt.*;
 import java.util.Set;
 
+/**
+ * This class takes care of the displaying of a colony on a canvas.
+ */
 public class ColonyView extends Canvas {
 
     private final GraphicsContext context;
@@ -23,6 +26,15 @@ public class ColonyView extends Canvas {
     private Color backGroundColor = Color.WHITE;
 
 
+    /**
+     * Creates a new object with the specified dimensions. The underlining canvas dimensions will
+     * be set to accommodate requested number and size of cells.
+     *
+     * @param hCellCount    number of cells to be displayed horizontally
+     * @param vCellCount    number of cells to be displayed vertically
+     * @param cellDimension the height and width of the cell in pixels
+     * @param cellMargin    the margin between neighbouring cells
+     */
     public ColonyView(int hCellCount, int vCellCount, double cellDimension, double cellMargin) {
         super(
                 hCellCount * (cellDimension + cellMargin),
@@ -32,48 +44,78 @@ public class ColonyView extends Canvas {
         this.cellDimension = cellDimension;
         this.cellMargin = cellMargin;
 
+        //used for transforming cartesian to polar coordinates
         this.offsetX = getWidth() / 2;
         this.offsetY = getHeight() / 2;
     }
 
+    /**
+     * Renders a colony
+     *
+     * @param colony to be rendered
+     */
     public void render(Colony colony) {
         resetCanvas();
         Set<Cell> cells = colony.getLiveCells();
 
         context.setFill(blockColor);
+
         cells.stream()
                 .map(Cell::getLocation)
                 .map(CellView::new)
                 .forEach(cellView -> cellView.render(context));
     }
 
+    /**
+     * Clears the canvas.
+     */
     public void resetCanvas() {
         context.setFill(this.backGroundColor);
         context.fillRect(0, 0, this.getWidth(), this.getHeight());
     }
 
+    /**
+     * Changes the block color to white and the background to black
+     */
     public void setDarkTheme() {
         blockColor = Color.WHITE;
         backGroundColor = Color.BLACK;
     }
 
+    /**
+     * Changes the block color to black and the background to white
+     */
     public void setLightTheme() {
         backGroundColor = Color.WHITE;
         blockColor = Color.BLACK;
     }
 
+    /**
+     * This represents a the view of a single sell
+     */
     private class CellView {
 
         private final double x;
         private final double y;
         private final double cellSize;
 
+        /**
+         * Creates a new cell view from the provided cartesian coordinates
+         *
+         * @param point cartesian coordinates of a cell model
+         */
         public CellView(Point point) {
+            //transform cartesian to polar coordinates
             this.x = offsetX + point.x * (cellMargin + cellDimension);
             this.y = offsetY - point.y * (cellMargin + cellDimension);
             cellSize = cellDimension;
         }
 
+        /**
+         * Render the cell
+         *
+         * @param context on which the cell will be rendered
+         */
         public void render(GraphicsContext context) {
             context.fillRect(x, y, cellSize, cellSize);
         }
