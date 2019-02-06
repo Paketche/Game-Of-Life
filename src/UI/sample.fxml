@@ -46,10 +46,9 @@
             <Separator/>
             <Label text="Evolution time(ms)"/>
             <Slider fx:id="speed" maxHeight="700"
-                    min="100" max="1000" orientation="VERTICAL"
+                    min="10" max="1000" orientation="VERTICAL"
                     value="500" blockIncrement="100"
                     showTickMarks="true" snapToTicks="true"
-                    majorTickUnit="150" minorTickCount="50"
                     showTickLabels="true"
             />
         </VBox>
