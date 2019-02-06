@@ -1,26 +1,65 @@
 package life;
 
 import java.awt.*;
-import java.util.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 import static java.util.stream.Collectors.toSet;
 
 public class Colony {
-    private final HashMap<Point, Cell> colonyMap;
-    private final HashMap<Point, Cell> newCells;
-    private final HashSet<Point> oldCell;
+    private final HashMap<Point, Cell> currentColony;
+    private final HashMap<Point, Cell> nextColony;
+
 
     public Colony() {
-        colonyMap = new HashMap<>();
-        newCells = new HashMap<>();
-        oldCell = new HashSet<>();
+        currentColony = new HashMap<>();
+        nextColony = new HashMap<>();
     }
 
+    /**
+     * Creates a new Colony filling it with cells as described from
+     *
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    public static Colony fromCSV(Path path) throws IOException {
+        List<String> rows = Files.readAllLines(path);
+
+        if (rows.size() == 0) {
+            throw new IllegalArgumentException("File does not contain values");
+        }
+        long cellsPerRow = rows.get(0).chars().filter(ch -> ch == ',').count() + 1;
+
+        int xOffset = (int) Math.floor(cellsPerRow / 2.0);
+        int yOffset = (int) Math.floor(rows.size() / 2.0);
+
+        Colony colony = new Colony();
+
+        for (int y = 0; y < rows.size(); y++) {
+
+            String[] values = rows.get(y).split(",");
+
+            if (values.length != cellsPerRow)
+                throw new IllegalArgumentException("Invalid csv format. Each row must have the same number of cells");
+
+            for (int x = 0; x < values.length; x++)
+                if (values[x].equals("1"))
+                    new Cell(
+                            new Point(x - xOffset, yOffset - y),
+                            colony
+                    );
+        }
+
+        return colony;
+    }
 
     public void saveCell(Cell cell) {
-        colonyMap.put(
+        nextColony.put(
                 cell.getLocation(),
                 cell
         );
@@ -36,37 +75,34 @@ public class Colony {
         );
 
         return neighbours.stream()
-                .map(colonyMap::get)
+                .map(currentColony::get)
                 .filter(Objects::nonNull)
                 .collect(toSet());
     }
 
     public HashMap<Point, Cell> iterate() {
-        newCells.forEach((key, value) -> colonyMap.computeIfAbsent(key, (k) -> value));
-        newCells.clear();
 
-        oldCell.forEach(colonyMap::remove);
-        oldCell.clear();
+        this.currentColony.clear();
+        this.currentColony.putAll(nextColony);
+        this.nextColony.clear();
 
-        colonyMap.values().forEach(cell -> cell.survive(this));
-
-        colonyMap.values().forEach(
+        currentColony.values().forEach(
                 cell -> cell.evolve(this)
         );
 
-        return colonyMap;
+        return currentColony;
     }
 
-    public void deleteCellAt(Point location) {
-        oldCell.add(location);
-    }
 
-    public void createDeadCellsAround(Point cellLocation) {
-        ArrayList<Point> locations = neighbouringCellLocations(cellLocation);
+    public void saveNewbornCell(Cell newborn) {
 
-        for (Point location : locations) {
-            newCells.put(location, new Cell(location));
-        }
+        saveCell(newborn);
+
+        ArrayList<Point> locations = neighbouringCellLocations(newborn.getLocation());
+
+        locations.stream()
+                .map(Cell::new)
+                .forEach(cell -> nextColony.computeIfAbsent(cell.getLocation(), l -> cell));
     }
 
     private ArrayList<Point> neighbouringCellLocations(Point location) {
@@ -88,5 +124,12 @@ public class Colony {
                 consumer.accept(x, y);
             }
         }
+    }
+
+    public Set<Cell> getLiveCells() {
+        return currentColony.values()
+                .stream()
+                .filter(Cell::isAlive)
+                .collect(toSet());
     }
 }

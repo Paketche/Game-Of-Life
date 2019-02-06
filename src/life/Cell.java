@@ -13,25 +13,18 @@ public class Cell {
     private final Point location;
 
     private boolean isAlive;
-    private boolean willSurvive;
-    private boolean toBeDeleted;
+
 
     public Cell(Point location) {
         this.location = location;
         this.isAlive = false;
-        this.willSurvive = false;
-        this.toBeDeleted = false;
     }
 
     public Cell(Point location, Colony colony) {
 
         this.location = location;
         this.isAlive = true;
-        this.willSurvive = true;
-        this.toBeDeleted = false;
-
-        colony.saveCell(this);
-        colony.createDeadCellsAround(this.location);
+        colony.saveNewbornCell(this);
     }
 
     public Point getLocation() {
@@ -39,10 +32,6 @@ public class Cell {
     }
 
     public void evolve(Colony colony) {
-        if (location.x == 1 && location.y == -1) {
-            System.out.print("");
-        }
-
         if (isAlive) evolveLiveCell(colony);
         else evolveDeadCell(colony);
     }
@@ -55,13 +44,13 @@ public class Cell {
 
         switch (livingNeighbours) {
             case REPRODUCTION:
-                this.willSurvive = true;
-                colony.createDeadCellsAround(this.location);
+                colony.saveNewbornCell(inverseCopy());
                 break;
             case DESOLATION:
-                toBeDeleted = true;
+                //do not carry cell over to next generation
+                break;
             default:
-                this.willSurvive = false;
+                colony.saveCell(this);
         }
     }
 
@@ -71,17 +60,22 @@ public class Cell {
                 .filter(Cell::isAlive)
                 .count();
 
-        willSurvive = livingNeighbours > UNDERPOPULATION && livingNeighbours < OVERPOPULATION;
+        if (livingNeighbours > UNDERPOPULATION && livingNeighbours < OVERPOPULATION){
+            colony.saveCell(this);
+        }
+        else{
+            colony.saveCell(inverseCopy());
+        }
+
     }
 
     public boolean isAlive() {
         return isAlive;
     }
 
-    public void survive(Colony colony) {
-        this.isAlive = willSurvive;
-        this.willSurvive = false;
-        if (toBeDeleted)
-            colony.deleteCellAt(this.location);
+    private Cell inverseCopy(){
+        Cell copy =  new Cell(this.location);
+        copy.isAlive = !this.isAlive;
+        return  copy;
     }
 }
