@@ -61,7 +61,15 @@ the looping event that iterates the colony generations. The following are the co
 
 # How to use
 
-To start the program...Afterwards, you may load one if the [patterns](https://github.com/Paketche/Game-Of-Life/tree/master/patterns) 
+To start the program by launching the runanble jar file.Afterwards, you may load one if the [patterns](https://github.com/Paketche/Game-Of-Life/tree/master/patterns) 
 contained in the projects. You are able to make your own CSV file and create an test as many colony patterns as you like, however there 
 are two rules to the file structure. Each row in the file must contain the same amount of values and living cells must be denoted with a 
-value of one. After you have loaded the file you are free to manipulate the canvas and the speed of the generation by using the controls. 
+value of one.
+
+![Opening File](https://github.com/Paketche/Game-Of-Life/blob/master/pictures/Screenshot%20from%202019-02-07%2013-05-44.png)
+
+After you have loaded the file you are free to manipulate the canvas and the speed of the generation by using the controls. 
+
+![UI](https://github.com/Paketche/Game-Of-Life/blob/master/pictures/Screenshot%20from%202019-02-07%2013-10-42.png)
+
+
