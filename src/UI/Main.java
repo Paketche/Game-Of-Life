@@ -25,7 +25,7 @@ public class Main extends Application {
 
         ColonyView view = new ColonyView(100, 50, 15, 1);
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Layout.fxml"));
         BorderPane root = loader.load();
 
         ColonyController colonyController = loader.getController();

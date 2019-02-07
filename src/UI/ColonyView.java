@@ -102,7 +102,6 @@ public class ColonyView extends Canvas {
      *                (negative numbers shift upwards, positive downwards)
      */
     public void shiftOffsets(double offsetX, double offsetY) {
-        System.out.println("Shifting x by " + offsetX + "y by " + offsetY);
         this.offsetX += offsetX;
         this.offsetY += offsetY;
     }
