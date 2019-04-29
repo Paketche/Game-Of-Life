@@ -1,4 +1,4 @@
-package UI;
+package valchanov.georgi;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -6,10 +6,12 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import life.Colony;
+import valchanov.georgi.UI.ColonyController;
+import valchanov.georgi.UI.ColonyView;
+import valchanov.georgi.life.Colony;
 
 
-public class Main extends Application {
+public class App extends Application {
 
     public static void main(String[] args) {
         launch(args);
@@ -23,7 +25,7 @@ public class Main extends Application {
 
         Colony colony = new Colony();
 
-        ColonyView view = new ColonyView(100, 50, 15, 1);
+        ColonyView view = new ColonyView(100, 50, 10, 1);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Layout.fxml"));
         BorderPane root = loader.load();

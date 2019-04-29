@@ -1,13 +1,12 @@
-package UI;
+package valchanov.georgi.UI;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import life.Cell;
-import life.Colony;
+import valchanov.georgi.life.Cell;
+import valchanov.georgi.life.Colony;
 
 import java.awt.*;
-import java.util.Set;
 
 /**
  * This class takes care of the displaying of a colony on a canvas.
@@ -15,13 +14,10 @@ import java.util.Set;
 public class ColonyView extends Canvas {
 
     private final GraphicsContext context;
-
-    private double offsetX;
-    private double offsetY;
-
     private final double initialOffsetX;
     private final double initialOffsetY;
-
+    private double offsetX;
+    private double offsetY;
     private double cellDimension;
     private double cellMargin;
 

@@ -1,4 +1,4 @@
-package UI;
+package valchanov.georgi.UI;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -18,7 +18,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import life.Colony;
+import valchanov.georgi.life.Colony;
 
 import java.awt.*;
 import java.io.File;
@@ -88,7 +88,7 @@ public class ColonyController extends Service<Colony> {
     protected Task<Colony> createTask() {
         return new Task<Colony>() {
             @Override
-            protected Colony call() throws Exception {
+            protected Colony call() {
                 colony.iterate();
 
                 //run on main application thread
@@ -249,6 +249,7 @@ public class ColonyController extends Service<Colony> {
 
     /**
      * Sets the window object that this controller will controlling
+     *
      * @param stage window that is to be controlled
      */
     public void setStage(Stage stage) {

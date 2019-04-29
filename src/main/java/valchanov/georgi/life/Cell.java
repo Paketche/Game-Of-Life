@@ -1,4 +1,4 @@
-package life;
+package valchanov.georgi.life;
 
 import java.awt.*;
 import java.util.Set;
