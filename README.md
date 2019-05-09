@@ -6,6 +6,10 @@ Game Of Life
 This repository contains a Java implementation of Conway's Game Of Life. The implantation includes an user interface 
 that allows for the visualisation of the separate states of the game of life. 
 
+# Running the game
+
+To build the project and run it simply open a terminal and `gradle run`. Alternatively if you do not have gradle installed use the gradle wrapper: `gradlew run`.
+
 # Rules of Game of life
 
 A the Game of Life  consists of an plane on which multiple cells are place. Each cell is meant to represent a living organism.
